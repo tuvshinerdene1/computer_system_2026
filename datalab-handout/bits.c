@@ -307,7 +307,32 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  int sign, b16, b8, b4, b2, b1, b0;
+
+  // x surug bol buh bit uudiig esreg bolgono.
+  sign = x >> 31;
+  x = (sign & ~x) | (~sign & x);
+
+  //binary search ashiglan hamgiin ehnii 1 iig olson
+  b16 = !!(x >> 16) << 4; // herew ehnii 16 bit dotor 1 baiwal b16 = 16
+  x = x >> b16;
+
+  b8 = !! (x >> 8) << 3;// herew dragin ehnii 8 bit dotor 1 baiwal b8 = 8
+  x = x >> b8;
+
+  b4 = !! (x >> 4) << 2;// herew dragin ehnii 4 bit dotor 1 baiwal b4 = 4
+  x = x >> b4;
+
+  b2 = !! (x >> 2) << 1;// herew dragin ehnii 2 bit dotor 1 baiwal b2 = 2
+  x = x >> b2;
+
+  b1 = !! (x >> 1);// herew dragin 1 bit bol b1 = 1
+  x = x >> b1;
+
+  b0 = x; // suuliin bit
+
+  // temdgiin bited zoriulan nemelt 1 iig nemsen.
+  return b16 + b8 + b4 + b2 + b1 + b0  + 1;
 }
 //float
 /* 
@@ -322,7 +347,27 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+  unsigned sign = uf & 0x80000000u;
+  unsigned exp = (uf >> 23) & 0xFF;
+
+  // NaN eswel infinity
+  if (exp == 0xFF){
+    return uf;
+  }
+
+  // denormalized numbers 
+  if (exp == 0){
+    return sign | (uf << 1);
+  }
+
+  //normalized numbers 
+  exp ++;
+  if (exp == 0xFF){
+    return sign | 0x7F800000u;
+  }
+
+
+  return sign | (exp << 23) | (uf & 0x7fffffu);
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
@@ -337,7 +382,31 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+  unsigned sign = uf & 0x80000000u;
+  int exp = ((uf >> 23)&0xff) - 127;
+  unsigned frac = (uf & 0x7FFFFFu) | 0x800000u; // ehnii 1 bitiig nemj baina
+
+  //1 ees baga utga 0 bolno
+  if (exp < 0){
+    return 0;
+  }
+
+  //overflow / nan / infinity
+  if (exp >= 31){
+    return 0x80000000u;
+  }
+  //mantissa g shift hiin unbiased exponenttoi taaruulj baina.
+  if (exp > 23){
+    frac = frac << (exp - 23);
+  }
+  else{
+    frac = frac >> (23 - exp);
+  }
+
+  if (sign){
+    return -frac;
+  }
+  return frac;
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
@@ -353,5 +422,21 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+  // single-precision float -d heterhii jijighen
+  if ( x < -149){
+    return 0;
+  }
+
+  // denormalized numbers
+  if ( x < -126){
+    return 1u << (x+149);
+  }
+
+  // overflow: return + inf
+  if ( x > 127){
+    return 0x7f800000u;
+  }
+
+  // normalized numbers 
+  return (x + 127) << 23;
 }
