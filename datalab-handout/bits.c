@@ -266,14 +266,30 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
+  // x ba y iin temdgiin bituud
   int signX = x >> 31;
   int signY = y >> 31;
+  
+  // ijilhen temdegtei eseh
   int sameSign = ~(signX ^ signY);
+  
+
+  // 2s complement ashiglan hasaj baina
   int diff = y + ~x + 1;
+
+  // ylgawariin temdeg
   int signDiff = diff >> 31;
+  
+  // nuhtsul 1 : ijilhen temdegtei bol y - x >= 0 bol x <=y baina.
   int condSame = sameSign & (~signDiff);
+  
+  //nuhtsul 2 : uur temdegte bol x ni surug tohioldold x <= y baina.
   int condDiff = ~sameSign & signX;
+  
+  // 2 nuhtsuliig negtgej baina.
   int ans = condSame | condDiff;
+  
+  // Return 1 or 0 
   return ans & 1;
 }
 //4

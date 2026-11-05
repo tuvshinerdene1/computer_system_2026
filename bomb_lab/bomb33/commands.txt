@@ -1,0 +1,7 @@
+objdump -d --disassemble=<phase number> bomb
+
+gdb commands :
+1. break / b -> breakpoint
+2. info breakpoints -> list of breakpoints
+3. si -> executes one machine instruction and pauses again.
+4. x/s -> examine/string
